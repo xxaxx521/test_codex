@@ -1,0 +1,27 @@
+# Python  
+__pycache__/ 
+*.py[cod] 
+*.pyo 
+ 
+# Virtual environment 
+.venv/ 
+venv/ 
+env/ 
+ 
+# User data 
+data/submissions.json 
+data/user_state.json 
+ 
+# Auto-generated content 
+data/generated_problems.json 
+data/update_state.json 
+ 
+# IDE 
+.vscode/ 
+.idea/ 
+*.swp 
+*.swo 
+ 
+# OS 
+.DS_Store 
+Thumbs.db

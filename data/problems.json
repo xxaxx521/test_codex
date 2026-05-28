@@ -1,0 +1,635 @@
+[
+  {
+    "id": "employees-without-bonus",
+    "title": "员工奖金",
+    "difficulty": "Easy",
+    "tags": ["LEFT JOIN", "NULL"],
+    "description": "查询每个奖金少于 1000 或没有奖金记录的员工姓名和奖金。返回列 name、bonus。",
+    "starter_sql": "SELECT\n  e.name,\n  b.bonus\nFROM Employee e\nLEFT JOIN Bonus b ON e.empId = b.empId\nWHERE b.bonus < 1000 OR b.bonus IS NULL;",
+    "expected_sql": "SELECT e.name, b.bonus FROM Employee e LEFT JOIN Bonus b ON e.empId = b.empId WHERE b.bonus < 1000 OR b.bonus IS NULL",
+    "schema": [
+      {
+        "name": "Employee",
+        "columns": [
+          {"name": "empId", "type": "INTEGER"},
+          {"name": "name", "type": "TEXT"},
+          {"name": "supervisor", "type": "INTEGER"},
+          {"name": "salary", "type": "INTEGER"}
+        ],
+        "rows": [
+          {"empId": 3, "name": "Brad", "supervisor": null, "salary": 4000},
+          {"empId": 1, "name": "John", "supervisor": 3, "salary": 1000},
+          {"empId": 2, "name": "Dan", "supervisor": 3, "salary": 2000},
+          {"empId": 4, "name": "Thomas", "supervisor": 3, "salary": 4000}
+        ]
+      },
+      {
+        "name": "Bonus",
+        "columns": [
+          {"name": "empId", "type": "INTEGER"},
+          {"name": "bonus", "type": "INTEGER"}
+        ],
+        "rows": [
+          {"empId": 2, "bonus": 500},
+          {"empId": 4, "bonus": 2000}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rising-temperature",
+    "title": "上升的温度",
+    "difficulty": "Easy",
+    "tags": ["SELF JOIN", "DATE"],
+    "description": "找出与前一天相比温度更高的记录 id。返回列 id。",
+    "starter_sql": "SELECT w1.id\nFROM Weather w1\nJOIN Weather w2\n  ON julianday(w1.recordDate) = julianday(w2.recordDate) + 1\nWHERE w1.temperature > w2.temperature;",
+    "expected_sql": "SELECT w1.id FROM Weather w1 JOIN Weather w2 ON julianday(w1.recordDate) = julianday(w2.recordDate) + 1 WHERE w1.temperature > w2.temperature",
+    "schema": [
+      {
+        "name": "Weather",
+        "columns": [
+          {"name": "id", "type": "INTEGER"},
+          {"name": "recordDate", "type": "TEXT"},
+          {"name": "temperature", "type": "INTEGER"}
+        ],
+        "rows": [
+          {"id": 1, "recordDate": "2015-01-01", "temperature": 10},
+          {"id": 2, "recordDate": "2015-01-02", "temperature": 25},
+          {"id": 3, "recordDate": "2015-01-03", "temperature": 20},
+          {"id": 4, "recordDate": "2015-01-04", "temperature": 30}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "department-top-salary",
+    "title": "部门最高工资",
+    "difficulty": "Medium",
+    "tags": ["JOIN", "GROUP BY", "SUBQUERY"],
+    "description": "找出每个部门工资最高的员工。返回列 Department、Employee、Salary。",
+    "starter_sql": "SELECT\n  d.name AS Department,\n  e.name AS Employee,\n  e.salary AS Salary\nFROM Employee e\nJOIN Department d ON e.departmentId = d.id\nWHERE e.salary = (\n  SELECT MAX(e2.salary)\n  FROM Employee e2\n  WHERE e2.departmentId = e.departmentId\n);",
+    "expected_sql": "SELECT d.name AS Department, e.name AS Employee, e.salary AS Salary FROM Employee e JOIN Department d ON e.departmentId = d.id WHERE e.salary = (SELECT MAX(e2.salary) FROM Employee e2 WHERE e2.departmentId = e.departmentId)",
+    "schema": [
+      {
+        "name": "Employee",
+        "columns": [
+          {"name": "id", "type": "INTEGER"},
+          {"name": "name", "type": "TEXT"},
+          {"name": "salary", "type": "INTEGER"},
+          {"name": "departmentId", "type": "INTEGER"}
+        ],
+        "rows": [
+          {"id": 1, "name": "Joe", "salary": 70000, "departmentId": 1},
+          {"id": 2, "name": "Jim", "salary": 90000, "departmentId": 1},
+          {"id": 3, "name": "Henry", "salary": 80000, "departmentId": 2},
+          {"id": 4, "name": "Sam", "salary": 60000, "departmentId": 2},
+          {"id": 5, "name": "Max", "salary": 90000, "departmentId": 1}
+        ]
+      },
+      {
+        "name": "Department",
+        "columns": [
+          {"name": "id", "type": "INTEGER"},
+          {"name": "name", "type": "TEXT"}
+        ],
+        "rows": [
+          {"id": 1, "name": "IT"},
+          {"id": 2, "name": "Sales"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "customer-order-frequency",
+    "title": "客户下单频率",
+    "difficulty": "Medium",
+    "tags": ["GROUP BY", "HAVING", "DATE"],
+    "description": "找出在 2024 年第一季度至少下过 2 单的客户。返回列 customer_id、order_count，并按 customer_id 升序排列。",
+    "starter_sql": "SELECT\n  customer_id,\n  COUNT(*) AS order_count\nFROM Orders\nWHERE order_date >= '2024-01-01'\n  AND order_date < '2024-04-01'\nGROUP BY customer_id\nHAVING COUNT(*) >= 2\nORDER BY customer_id;",
+    "expected_sql": "SELECT customer_id, COUNT(*) AS order_count FROM Orders WHERE order_date >= '2024-01-01' AND order_date < '2024-04-01' GROUP BY customer_id HAVING COUNT(*) >= 2 ORDER BY customer_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Orders",
+        "columns": [
+          {"name": "order_id", "type": "INTEGER"},
+          {"name": "customer_id", "type": "INTEGER"},
+          {"name": "order_date", "type": "TEXT"},
+          {"name": "amount", "type": "REAL"}
+        ],
+        "rows": [
+          {"order_id": 101, "customer_id": 1, "order_date": "2024-01-05", "amount": 99.9},
+          {"order_id": 102, "customer_id": 2, "order_date": "2024-01-12", "amount": 35.0},
+          {"order_id": 103, "customer_id": 1, "order_date": "2024-02-07", "amount": 120.0},
+          {"order_id": 104, "customer_id": 3, "order_date": "2024-03-21", "amount": 48.5},
+          {"order_id": 105, "customer_id": 2, "order_date": "2024-04-03", "amount": 76.0},
+          {"order_id": 106, "customer_id": 3, "order_date": "2024-03-30", "amount": 155.0},
+          {"order_id": 107, "customer_id": 4, "order_date": "2023-12-30", "amount": 27.5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "customers-never-ordered",
+    "title": "从未下单的客户",
+    "difficulty": "Easy",
+    "tags": ["LEFT JOIN", "NULL"],
+    "description": "找出从未产生订单的客户。返回列 customer_id、name，并按 customer_id 升序排列。",
+    "starter_sql": "SELECT\n  c.customer_id,\n  c.name\nFROM Customers c\nLEFT JOIN Orders o ON c.customer_id = o.customer_id\nWHERE o.order_id IS NULL\nORDER BY c.customer_id;",
+    "expected_sql": "SELECT c.customer_id, c.name FROM Customers c LEFT JOIN Orders o ON c.customer_id = o.customer_id WHERE o.order_id IS NULL ORDER BY c.customer_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Customers",
+        "columns": [
+          {"name": "customer_id", "type": "INTEGER"},
+          {"name": "name", "type": "TEXT"}
+        ],
+        "rows": [
+          {"customer_id": 1, "name": "Alice"},
+          {"customer_id": 2, "name": "Ben"},
+          {"customer_id": 3, "name": "Cindy"},
+          {"customer_id": 4, "name": "Derek"}
+        ]
+      },
+      {
+        "name": "Orders",
+        "columns": [
+          {"name": "order_id", "type": "INTEGER"},
+          {"name": "customer_id", "type": "INTEGER"},
+          {"name": "amount", "type": "REAL"}
+        ],
+        "rows": [
+          {"order_id": 101, "customer_id": 1, "amount": 58.0},
+          {"order_id": 102, "customer_id": 1, "amount": 72.0},
+          {"order_id": 103, "customer_id": 3, "amount": 19.5}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "duplicate-emails",
+    "title": "重复邮箱",
+    "difficulty": "Easy",
+    "tags": ["GROUP BY", "HAVING"],
+    "description": "找出出现次数超过 1 次的邮箱。返回列 email，并按 email 升序排列。",
+    "starter_sql": "SELECT email\nFROM Person\nGROUP BY email\nHAVING COUNT(*) > 1\nORDER BY email;",
+    "expected_sql": "SELECT email FROM Person GROUP BY email HAVING COUNT(*) > 1 ORDER BY email",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Person",
+        "columns": [
+          {"name": "id", "type": "INTEGER"},
+          {"name": "email", "type": "TEXT"}
+        ],
+        "rows": [
+          {"id": 1, "email": "a@example.com"},
+          {"id": 2, "email": "b@example.com"},
+          {"id": 3, "email": "a@example.com"},
+          {"id": 4, "email": "c@example.com"},
+          {"id": 5, "email": "b@example.com"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "second-highest-salary",
+    "title": "第二高薪资",
+    "difficulty": "Medium",
+    "tags": ["DISTINCT", "SUBQUERY"],
+    "description": "查询第二高的不同薪资。返回列 SecondHighestSalary；如果不存在第二高薪资，返回 NULL。",
+    "starter_sql": "SELECT (\n  SELECT DISTINCT salary\n  FROM Employee\n  ORDER BY salary DESC\n  LIMIT 1 OFFSET 1\n) AS SecondHighestSalary;",
+    "expected_sql": "SELECT (SELECT DISTINCT salary FROM Employee ORDER BY salary DESC LIMIT 1 OFFSET 1) AS SecondHighestSalary",
+    "schema": [
+      {
+        "name": "Employee",
+        "columns": [
+          {"name": "id", "type": "INTEGER"},
+          {"name": "salary", "type": "INTEGER"}
+        ],
+        "rows": [
+          {"id": 1, "salary": 100},
+          {"id": 2, "salary": 200},
+          {"id": 3, "salary": 300},
+          {"id": 4, "salary": 300}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "top-sellers-by-category",
+    "title": "每类销售冠军",
+    "difficulty": "Medium",
+    "tags": ["JOIN", "GROUP BY", "RANK"],
+    "description": "统计每个商品分类销售额最高的商品，若并列都返回。返回列 category、product_name、revenue，并按 category、product_name 升序排列。",
+    "starter_sql": "WITH product_revenue AS (\n  SELECT\n    p.category,\n    p.product_name,\n    SUM(s.quantity * s.price) AS revenue\n  FROM Products p\n  JOIN Sales s ON p.product_id = s.product_id\n  GROUP BY p.category, p.product_name\n), ranked AS (\n  SELECT\n    category,\n    product_name,\n    revenue,\n    RANK() OVER (PARTITION BY category ORDER BY revenue DESC) AS rk\n  FROM product_revenue\n)\nSELECT category, product_name, revenue\nFROM ranked\nWHERE rk = 1\nORDER BY category, product_name;",
+    "expected_sql": "WITH product_revenue AS (SELECT p.category, p.product_name, SUM(s.quantity * s.price) AS revenue FROM Products p JOIN Sales s ON p.product_id = s.product_id GROUP BY p.category, p.product_name), ranked AS (SELECT category, product_name, revenue, RANK() OVER (PARTITION BY category ORDER BY revenue DESC) AS rk FROM product_revenue) SELECT category, product_name, revenue FROM ranked WHERE rk = 1 ORDER BY category, product_name",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Products",
+        "columns": [
+          {"name": "product_id", "type": "INTEGER"},
+          {"name": "product_name", "type": "TEXT"},
+          {"name": "category", "type": "TEXT"}
+        ],
+        "rows": [
+          {"product_id": 1, "product_name": "Keyboard", "category": "Electronics"},
+          {"product_id": 2, "product_name": "Mouse", "category": "Electronics"},
+          {"product_id": 3, "product_name": "Notebook", "category": "Office"},
+          {"product_id": 4, "product_name": "Pen", "category": "Office"}
+        ]
+      },
+      {
+        "name": "Sales",
+        "columns": [
+          {"name": "sale_id", "type": "INTEGER"},
+          {"name": "product_id", "type": "INTEGER"},
+          {"name": "quantity", "type": "INTEGER"},
+          {"name": "price", "type": "REAL"}
+        ],
+        "rows": [
+          {"sale_id": 1, "product_id": 1, "quantity": 3, "price": 100.0},
+          {"sale_id": 2, "product_id": 2, "quantity": 10, "price": 30.0},
+          {"sale_id": 3, "product_id": 3, "quantity": 5, "price": 8.0},
+          {"sale_id": 4, "product_id": 4, "quantity": 20, "price": 2.0},
+          {"sale_id": 5, "product_id": 1, "quantity": 1, "price": 100.0}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "top-two-orders-per-user",
+    "title": "每位用户金额最高的两笔订单",
+    "difficulty": "Medium",
+    "tags": ["ROW_NUMBER", "WINDOW"],
+    "description": "找出每位用户金额最高的两笔订单。若金额相同，订单号小的排前。返回列 user_id、order_id、amount，并按 user_id、amount 降序、order_id 升序排列。",
+    "starter_sql": "WITH ranked AS (\n  SELECT\n    user_id,\n    order_id,\n    amount,\n    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY amount DESC, order_id ASC) AS rn\n  FROM Orders\n)\nSELECT user_id, order_id, amount\nFROM ranked\nWHERE rn <= 2\nORDER BY user_id, amount DESC, order_id;",
+    "expected_sql": "WITH ranked AS (SELECT user_id, order_id, amount, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY amount DESC, order_id ASC) AS rn FROM Orders) SELECT user_id, order_id, amount FROM ranked WHERE rn <= 2 ORDER BY user_id, amount DESC, order_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Orders",
+        "columns": [
+          {"name": "order_id", "type": "INTEGER"},
+          {"name": "user_id", "type": "INTEGER"},
+          {"name": "amount", "type": "REAL"}
+        ],
+        "rows": [
+          {"order_id": 1, "user_id": 10, "amount": 50.0},
+          {"order_id": 2, "user_id": 10, "amount": 75.0},
+          {"order_id": 3, "user_id": 10, "amount": 75.0},
+          {"order_id": 4, "user_id": 20, "amount": 12.0},
+          {"order_id": 5, "user_id": 20, "amount": 99.0},
+          {"order_id": 6, "user_id": 30, "amount": 44.0}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "running-total-by-account",
+    "title": "账户累计流水",
+    "difficulty": "Medium",
+    "tags": ["WINDOW", "RUNNING TOTAL"],
+    "description": "计算每个账户按交易日期和交易号排序后的累计金额。返回列 account_id、txn_date、amount、running_balance，并按 account_id、txn_date、txn_id 排序。",
+    "starter_sql": "SELECT\n  account_id,\n  txn_date,\n  amount,\n  SUM(amount) OVER (\n    PARTITION BY account_id\n    ORDER BY txn_date, txn_id\n    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW\n  ) AS running_balance\nFROM Transactions\nORDER BY account_id, txn_date, txn_id;",
+    "expected_sql": "SELECT account_id, txn_date, amount, SUM(amount) OVER (PARTITION BY account_id ORDER BY txn_date, txn_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS running_balance FROM Transactions ORDER BY account_id, txn_date, txn_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Transactions",
+        "columns": [
+          {"name": "txn_id", "type": "INTEGER"},
+          {"name": "account_id", "type": "INTEGER"},
+          {"name": "txn_date", "type": "TEXT"},
+          {"name": "amount", "type": "REAL"}
+        ],
+        "rows": [
+          {"txn_id": 1, "account_id": 1, "txn_date": "2024-01-01", "amount": 100.0},
+          {"txn_id": 2, "account_id": 1, "txn_date": "2024-01-03", "amount": -20.0},
+          {"txn_id": 3, "account_id": 1, "txn_date": "2024-01-03", "amount": 15.0},
+          {"txn_id": 4, "account_id": 2, "txn_date": "2024-01-02", "amount": 200.0},
+          {"txn_id": 5, "account_id": 2, "txn_date": "2024-01-05", "amount": -50.0}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "consecutive-login-three-days",
+    "title": "连续三天登录",
+    "difficulty": "Hard",
+    "tags": ["WINDOW", "DATE", "GAPS AND ISLANDS"],
+    "description": "找出至少连续登录 3 天的用户。同一用户同一天多次登录只算一天。返回列 user_id，并按 user_id 升序排列。",
+    "starter_sql": "WITH daily AS (\n  SELECT DISTINCT user_id, login_date\n  FROM Logins\n), grouped AS (\n  SELECT\n    user_id,\n    login_date,\n    julianday(login_date) - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY login_date) AS grp\n  FROM daily\n), streaks AS (\n  SELECT user_id, COUNT(*) AS days\n  FROM grouped\n  GROUP BY user_id, grp\n)\nSELECT DISTINCT user_id\nFROM streaks\nWHERE days >= 3\nORDER BY user_id;",
+    "expected_sql": "WITH daily AS (SELECT DISTINCT user_id, login_date FROM Logins), grouped AS (SELECT user_id, login_date, julianday(login_date) - ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY login_date) AS grp FROM daily), streaks AS (SELECT user_id, COUNT(*) AS days FROM grouped GROUP BY user_id, grp) SELECT DISTINCT user_id FROM streaks WHERE days >= 3 ORDER BY user_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Logins",
+        "columns": [
+          {"name": "user_id", "type": "INTEGER"},
+          {"name": "login_date", "type": "TEXT"}
+        ],
+        "rows": [
+          {"user_id": 1, "login_date": "2024-01-01"},
+          {"user_id": 1, "login_date": "2024-01-02"},
+          {"user_id": 1, "login_date": "2024-01-03"},
+          {"user_id": 2, "login_date": "2024-01-01"},
+          {"user_id": 2, "login_date": "2024-01-03"},
+          {"user_id": 2, "login_date": "2024-01-04"},
+          {"user_id": 3, "login_date": "2024-02-10"},
+          {"user_id": 3, "login_date": "2024-02-11"},
+          {"user_id": 3, "login_date": "2024-02-12"},
+          {"user_id": 3, "login_date": "2024-02-12"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "day-one-retention",
+    "title": "次日留存率",
+    "difficulty": "Hard",
+    "tags": ["RETENTION", "DATE", "SELF JOIN"],
+    "description": "计算首次登录用户的次日留存率。若用户首次登录后的第二天也登录，则算留存。返回列 retention_rate，保留 2 位小数。",
+    "starter_sql": "WITH first_login AS (\n  SELECT user_id, MIN(login_date) AS first_date\n  FROM Logins\n  GROUP BY user_id\n), retained AS (\n  SELECT DISTINCT f.user_id\n  FROM first_login f\n  JOIN Logins l\n    ON f.user_id = l.user_id\n   AND julianday(l.login_date) = julianday(f.first_date) + 1\n)\nSELECT ROUND(1.0 * COUNT(r.user_id) / COUNT(f.user_id), 2) AS retention_rate\nFROM first_login f\nLEFT JOIN retained r ON f.user_id = r.user_id;",
+    "expected_sql": "WITH first_login AS (SELECT user_id, MIN(login_date) AS first_date FROM Logins GROUP BY user_id), retained AS (SELECT DISTINCT f.user_id FROM first_login f JOIN Logins l ON f.user_id = l.user_id AND julianday(l.login_date) = julianday(f.first_date) + 1) SELECT ROUND(1.0 * COUNT(r.user_id) / COUNT(f.user_id), 2) AS retention_rate FROM first_login f LEFT JOIN retained r ON f.user_id = r.user_id",
+    "schema": [
+      {
+        "name": "Logins",
+        "columns": [
+          {"name": "user_id", "type": "INTEGER"},
+          {"name": "login_date", "type": "TEXT"}
+        ],
+        "rows": [
+          {"user_id": 1, "login_date": "2024-01-01"},
+          {"user_id": 1, "login_date": "2024-01-02"},
+          {"user_id": 2, "login_date": "2024-01-05"},
+          {"user_id": 2, "login_date": "2024-01-07"},
+          {"user_id": 3, "login_date": "2024-01-02"},
+          {"user_id": 3, "login_date": "2024-01-03"},
+          {"user_id": 4, "login_date": "2024-01-10"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "monthly-revenue-growth",
+    "title": "月收入环比增长",
+    "difficulty": "Medium",
+    "tags": ["GROUP BY", "LAG", "DATE"],
+    "description": "按月份统计收入，并计算相对上月的增长率。返回列 month、revenue、growth_rate；首月 growth_rate 为 NULL，其他月份保留 2 位小数。",
+    "starter_sql": "WITH monthly AS (\n  SELECT\n    strftime('%Y-%m', paid_at) AS month,\n    SUM(amount) AS revenue\n  FROM Payments\n  GROUP BY strftime('%Y-%m', paid_at)\n), with_prev AS (\n  SELECT\n    month,\n    revenue,\n    LAG(revenue) OVER (ORDER BY month) AS prev_revenue\n  FROM monthly\n)\nSELECT\n  month,\n  revenue,\n  ROUND(1.0 * (revenue - prev_revenue) / prev_revenue, 2) AS growth_rate\nFROM with_prev\nORDER BY month;",
+    "expected_sql": "WITH monthly AS (SELECT strftime('%Y-%m', paid_at) AS month, SUM(amount) AS revenue FROM Payments GROUP BY strftime('%Y-%m', paid_at)), with_prev AS (SELECT month, revenue, LAG(revenue) OVER (ORDER BY month) AS prev_revenue FROM monthly) SELECT month, revenue, ROUND(1.0 * (revenue - prev_revenue) / prev_revenue, 2) AS growth_rate FROM with_prev ORDER BY month",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Payments",
+        "columns": [
+          {"name": "payment_id", "type": "INTEGER"},
+          {"name": "paid_at", "type": "TEXT"},
+          {"name": "amount", "type": "REAL"}
+        ],
+        "rows": [
+          {"payment_id": 1, "paid_at": "2024-01-03", "amount": 100.0},
+          {"payment_id": 2, "paid_at": "2024-01-21", "amount": 50.0},
+          {"payment_id": 3, "paid_at": "2024-02-05", "amount": 300.0},
+          {"payment_id": 4, "paid_at": "2024-03-02", "amount": 150.0},
+          {"payment_id": 5, "paid_at": "2024-03-28", "amount": 150.0}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "students-above-course-average",
+    "title": "高于课程平均分",
+    "difficulty": "Medium",
+    "tags": ["WINDOW", "AVG"],
+    "description": "找出成绩高于所在课程平均分的学生成绩记录。返回列 course_id、student_id、score，并按 course_id、student_id 排序。",
+    "starter_sql": "WITH scored AS (\n  SELECT\n    course_id,\n    student_id,\n    score,\n    AVG(score) OVER (PARTITION BY course_id) AS avg_score\n  FROM Scores\n)\nSELECT course_id, student_id, score\nFROM scored\nWHERE score > avg_score\nORDER BY course_id, student_id;",
+    "expected_sql": "WITH scored AS (SELECT course_id, student_id, score, AVG(score) OVER (PARTITION BY course_id) AS avg_score FROM Scores) SELECT course_id, student_id, score FROM scored WHERE score > avg_score ORDER BY course_id, student_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Scores",
+        "columns": [
+          {"name": "student_id", "type": "INTEGER"},
+          {"name": "course_id", "type": "TEXT"},
+          {"name": "score", "type": "INTEGER"}
+        ],
+        "rows": [
+          {"student_id": 1, "course_id": "SQL", "score": 91},
+          {"student_id": 2, "course_id": "SQL", "score": 76},
+          {"student_id": 3, "course_id": "SQL", "score": 83},
+          {"student_id": 1, "course_id": "Python", "score": 88},
+          {"student_id": 2, "course_id": "Python", "score": 92},
+          {"student_id": 3, "course_id": "Python", "score": 70}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "latest-status-per-ticket",
+    "title": "工单最新状态",
+    "difficulty": "Medium",
+    "tags": ["ROW_NUMBER", "DEDUP"],
+    "description": "每个工单只保留最新一条状态记录；若更新时间相同，status_id 大的更新。返回列 ticket_id、status、updated_at，并按 ticket_id 升序排列。",
+    "starter_sql": "WITH ranked AS (\n  SELECT\n    ticket_id,\n    status,\n    updated_at,\n    ROW_NUMBER() OVER (PARTITION BY ticket_id ORDER BY updated_at DESC, status_id DESC) AS rn\n  FROM TicketStatus\n)\nSELECT ticket_id, status, updated_at\nFROM ranked\nWHERE rn = 1\nORDER BY ticket_id;",
+    "expected_sql": "WITH ranked AS (SELECT ticket_id, status, updated_at, ROW_NUMBER() OVER (PARTITION BY ticket_id ORDER BY updated_at DESC, status_id DESC) AS rn FROM TicketStatus) SELECT ticket_id, status, updated_at FROM ranked WHERE rn = 1 ORDER BY ticket_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "TicketStatus",
+        "columns": [
+          {"name": "status_id", "type": "INTEGER"},
+          {"name": "ticket_id", "type": "INTEGER"},
+          {"name": "status", "type": "TEXT"},
+          {"name": "updated_at", "type": "TEXT"}
+        ],
+        "rows": [
+          {"status_id": 1, "ticket_id": 100, "status": "open", "updated_at": "2024-01-01 09:00"},
+          {"status_id": 2, "ticket_id": 100, "status": "pending", "updated_at": "2024-01-02 10:00"},
+          {"status_id": 3, "ticket_id": 101, "status": "open", "updated_at": "2024-01-01 11:00"},
+          {"status_id": 4, "ticket_id": 101, "status": "closed", "updated_at": "2024-01-03 08:00"},
+          {"status_id": 5, "ticket_id": 101, "status": "reopened", "updated_at": "2024-01-03 08:00"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "manager-team-size",
+    "title": "经理团队人数",
+    "difficulty": "Easy",
+    "tags": ["SELF JOIN", "GROUP BY"],
+    "description": "统计每位经理直接管理的员工数量。只返回至少有 1 名直属员工的经理。返回列 manager_id、manager_name、team_size，并按 manager_id 升序排列。",
+    "starter_sql": "SELECT\n  m.employee_id AS manager_id,\n  m.name AS manager_name,\n  COUNT(e.employee_id) AS team_size\nFROM Employees m\nJOIN Employees e ON m.employee_id = e.manager_id\nGROUP BY m.employee_id, m.name\nORDER BY manager_id;",
+    "expected_sql": "SELECT m.employee_id AS manager_id, m.name AS manager_name, COUNT(e.employee_id) AS team_size FROM Employees m JOIN Employees e ON m.employee_id = e.manager_id GROUP BY m.employee_id, m.name ORDER BY manager_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Employees",
+        "columns": [
+          {"name": "employee_id", "type": "INTEGER"},
+          {"name": "name", "type": "TEXT"},
+          {"name": "manager_id", "type": "INTEGER"}
+        ],
+        "rows": [
+          {"employee_id": 1, "name": "Lina", "manager_id": null},
+          {"employee_id": 2, "name": "Ming", "manager_id": 1},
+          {"employee_id": 3, "name": "Owen", "manager_id": 1},
+          {"employee_id": 4, "name": "Nora", "manager_id": 2},
+          {"employee_id": 5, "name": "Paul", "manager_id": 2}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "product-conversion-rate",
+    "title": "商品转化率",
+    "difficulty": "Medium",
+    "tags": ["CASE", "GROUP BY"],
+    "description": "统计每个商品的购买转化率：购买事件数 / 浏览事件数。返回列 product_id、conversion_rate，保留 2 位小数，并按 product_id 升序排列。没有浏览事件时返回 NULL。",
+    "starter_sql": "SELECT\n  product_id,\n  ROUND(\n    1.0 * SUM(CASE WHEN event_type = 'purchase' THEN 1 ELSE 0 END) /\n    NULLIF(SUM(CASE WHEN event_type = 'view' THEN 1 ELSE 0 END), 0),\n    2\n  ) AS conversion_rate\nFROM Events\nGROUP BY product_id\nORDER BY product_id;",
+    "expected_sql": "SELECT product_id, ROUND(1.0 * SUM(CASE WHEN event_type = 'purchase' THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN event_type = 'view' THEN 1 ELSE 0 END), 0), 2) AS conversion_rate FROM Events GROUP BY product_id ORDER BY product_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Events",
+        "columns": [
+          {"name": "event_id", "type": "INTEGER"},
+          {"name": "product_id", "type": "INTEGER"},
+          {"name": "event_type", "type": "TEXT"}
+        ],
+        "rows": [
+          {"event_id": 1, "product_id": 10, "event_type": "view"},
+          {"event_id": 2, "product_id": 10, "event_type": "view"},
+          {"event_id": 3, "product_id": 10, "event_type": "purchase"},
+          {"event_id": 4, "product_id": 20, "event_type": "view"},
+          {"event_id": 5, "product_id": 20, "event_type": "purchase"},
+          {"event_id": 6, "product_id": 20, "event_type": "purchase"},
+          {"event_id": 7, "product_id": 30, "event_type": "purchase"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "median-order-amount",
+    "title": "订单金额中位数",
+    "difficulty": "Hard",
+    "tags": ["WINDOW", "MEDIAN"],
+    "description": "计算所有订单金额的中位数。订单数为偶数时取中间两项平均值。返回列 median_amount。",
+    "starter_sql": "WITH ranked AS (\n  SELECT\n    amount,\n    ROW_NUMBER() OVER (ORDER BY amount) AS rn,\n    COUNT(*) OVER () AS cnt\n  FROM Orders\n)\nSELECT AVG(amount) AS median_amount\nFROM ranked\nWHERE rn IN ((cnt + 1) / 2, (cnt + 2) / 2);",
+    "expected_sql": "WITH ranked AS (SELECT amount, ROW_NUMBER() OVER (ORDER BY amount) AS rn, COUNT(*) OVER () AS cnt FROM Orders) SELECT AVG(amount) AS median_amount FROM ranked WHERE rn IN ((cnt + 1) / 2, (cnt + 2) / 2)",
+    "schema": [
+      {
+        "name": "Orders",
+        "columns": [
+          {"name": "order_id", "type": "INTEGER"},
+          {"name": "amount", "type": "REAL"}
+        ],
+        "rows": [
+          {"order_id": 1, "amount": 12.0},
+          {"order_id": 2, "amount": 18.0},
+          {"order_id": 3, "amount": 27.0},
+          {"order_id": 4, "amount": 40.0},
+          {"order_id": 5, "amount": 100.0},
+          {"order_id": 6, "amount": 120.0}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "inactive-users-last-30-days",
+    "title": "近 30 天未活跃用户",
+    "difficulty": "Medium",
+    "tags": ["LEFT JOIN", "DATE"],
+    "description": "以 2024-04-01 为当前日期，找出最近 30 天没有任何登录记录的用户。返回列 user_id、name，并按 user_id 升序排列。",
+    "starter_sql": "SELECT u.user_id, u.name\nFROM Users u\nLEFT JOIN Logins l\n  ON u.user_id = l.user_id\n AND l.login_date >= date('2024-04-01', '-30 day')\n AND l.login_date < '2024-04-01'\nWHERE l.user_id IS NULL\nORDER BY u.user_id;",
+    "expected_sql": "SELECT u.user_id, u.name FROM Users u LEFT JOIN Logins l ON u.user_id = l.user_id AND l.login_date >= date('2024-04-01', '-30 day') AND l.login_date < '2024-04-01' WHERE l.user_id IS NULL ORDER BY u.user_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Users",
+        "columns": [
+          {"name": "user_id", "type": "INTEGER"},
+          {"name": "name", "type": "TEXT"}
+        ],
+        "rows": [
+          {"user_id": 1, "name": "Ava"},
+          {"user_id": 2, "name": "Bo"},
+          {"user_id": 3, "name": "Chen"},
+          {"user_id": 4, "name": "Dina"}
+        ]
+      },
+      {
+        "name": "Logins",
+        "columns": [
+          {"name": "user_id", "type": "INTEGER"},
+          {"name": "login_date", "type": "TEXT"}
+        ],
+        "rows": [
+          {"user_id": 1, "login_date": "2024-03-20"},
+          {"user_id": 2, "login_date": "2024-02-15"},
+          {"user_id": 4, "login_date": "2024-04-01"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "nth-purchase-per-user",
+    "title": "用户第三次购买",
+    "difficulty": "Medium",
+    "tags": ["ROW_NUMBER", "DATE"],
+    "description": "找出每位用户的第三次购买记录。若同一天多笔购买，按 order_id 升序决定先后。返回列 user_id、order_id、order_date，并按 user_id 升序排列。",
+    "starter_sql": "WITH ranked AS (\n  SELECT\n    user_id,\n    order_id,\n    order_date,\n    ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY order_date, order_id) AS rn\n  FROM Orders\n)\nSELECT user_id, order_id, order_date\nFROM ranked\nWHERE rn = 3\nORDER BY user_id;",
+    "expected_sql": "WITH ranked AS (SELECT user_id, order_id, order_date, ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY order_date, order_id) AS rn FROM Orders) SELECT user_id, order_id, order_date FROM ranked WHERE rn = 3 ORDER BY user_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Orders",
+        "columns": [
+          {"name": "order_id", "type": "INTEGER"},
+          {"name": "user_id", "type": "INTEGER"},
+          {"name": "order_date", "type": "TEXT"}
+        ],
+        "rows": [
+          {"order_id": 1, "user_id": 1, "order_date": "2024-01-01"},
+          {"order_id": 2, "user_id": 1, "order_date": "2024-01-03"},
+          {"order_id": 3, "user_id": 1, "order_date": "2024-01-03"},
+          {"order_id": 4, "user_id": 2, "order_date": "2024-02-01"},
+          {"order_id": 5, "user_id": 2, "order_date": "2024-02-02"},
+          {"order_id": 6, "user_id": 3, "order_date": "2024-03-01"},
+          {"order_id": 7, "user_id": 3, "order_date": "2024-03-02"},
+          {"order_id": 8, "user_id": 3, "order_date": "2024-03-03"}
+        ]
+      }
+    ]
+  },
+  {
+    "id": "employees-higher-than-manager",
+    "title": "薪资高于经理的员工",
+    "difficulty": "Easy",
+    "tags": ["SELF JOIN"],
+    "description": "找出薪资高于直属经理的员工。返回列 employee_id、employee_name，并按 employee_id 升序排列。",
+    "starter_sql": "SELECT\n  e.employee_id,\n  e.name AS employee_name\nFROM Employees e\nJOIN Employees m ON e.manager_id = m.employee_id\nWHERE e.salary > m.salary\nORDER BY e.employee_id;",
+    "expected_sql": "SELECT e.employee_id, e.name AS employee_name FROM Employees e JOIN Employees m ON e.manager_id = m.employee_id WHERE e.salary > m.salary ORDER BY e.employee_id",
+    "order_sensitive": true,
+    "schema": [
+      {
+        "name": "Employees",
+        "columns": [
+          {"name": "employee_id", "type": "INTEGER"},
+          {"name": "name", "type": "TEXT"},
+          {"name": "salary", "type": "INTEGER"},
+          {"name": "manager_id", "type": "INTEGER"}
+        ],
+        "rows": [
+          {"employee_id": 1, "name": "Lina", "salary": 90000, "manager_id": null},
+          {"employee_id": 2, "name": "Ming", "salary": 95000, "manager_id": 1},
+          {"employee_id": 3, "name": "Owen", "salary": 70000, "manager_id": 1},
+          {"employee_id": 4, "name": "Nora", "salary": 72000, "manager_id": 3}
+        ]
+      }
+    ]
+  }
+]

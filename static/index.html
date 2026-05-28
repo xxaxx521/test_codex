@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SQL Practice Lab</title>
+    <link rel="stylesheet" href="/vendor/codemirror/codemirror.min.css" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-mark">SQL</span>
+        <div>
+          <strong>Practice Lab</strong>
+          <small>本地判题 · AI 辅助</small>
+        </div>
+      </div>
+
+      <div class="search">
+        <input id="searchInput" type="search" placeholder="搜索题目或标签" />
+      </div>
+      <div class="filter-row" aria-label="难度筛选">
+        <button class="difficulty-filter active" data-difficulty="all">全部</button>
+        <button class="difficulty-filter" data-difficulty="Easy">简单</button>
+        <button class="difficulty-filter" data-difficulty="Medium">中等</button>
+        <button class="difficulty-filter" data-difficulty="Hard">困难</button>
+      </div>
+      <div class="daily-update">
+        <div>
+          <strong>每日新题</strong>
+          <span id="updateStatus">检查中...</span>
+        </div>
+        <button id="updateBtn" title="从公开来源读取题型信号并生成原创练习">更新</button>
+      </div>
+      <nav id="problemList" class="problem-list" aria-label="题目列表"></nav>
+    </aside>
+
+    <main class="workspace">
+      <section class="problem-pane">
+        <div class="problem-head">
+          <div>
+            <p id="difficulty" class="difficulty">Easy</p>
+            <h1 id="problemTitle">加载中</h1>
+          </div>
+          <div id="tags" class="tags"></div>
+        </div>
+
+        <div class="tab-row" role="tablist" aria-label="题目详情">
+          <button class="tab active" data-tab="description">题目</button>
+          <button class="tab" data-tab="schema">表结构</button>
+          <button class="tab" data-tab="submissions">提交记录</button>
+          <button class="tab" data-tab="solution">解析</button>
+        </div>
+
+        <section id="descriptionTab" class="tab-panel active">
+          <p id="description" class="description"></p>
+          <div id="sourceNote" class="source-note hidden"></div>
+        </section>
+        <section id="schemaTab" class="tab-panel">
+          <div id="schema" class="schema"></div>
+        </section>
+        <section id="submissionsTab" class="tab-panel">
+          <div id="submissions" class="submissions muted">暂无提交记录</div>
+        </section>
+        <section id="solutionTab" class="tab-panel">
+          <div id="solutionBox" class="solution-box muted">解析默认隐藏。需要时点击查看完整解法。</div>
+          <button id="solutionBtn" class="primary">查看完整解法</button>
+        </section>
+      </section>
+
+      <section class="editor-pane">
+        <div class="toolbar">
+          <div class="toolbar-group">
+            <button id="runBtn" class="primary">运行判题</button>
+            <button id="resetBtn">重置模板</button>
+            <button id="saveDraftBtn">保存草稿</button>
+          </div>
+          <span id="status" class="status">准备就绪</span>
+        </div>
+        <textarea id="sqlEditor" spellcheck="false"></textarea>
+        <div class="result-grid">
+          <section>
+            <h2>你的结果</h2>
+            <div id="actualResult" class="table-wrap muted">运行后显示结果</div>
+          </section>
+          <section>
+            <h2>判题信息</h2>
+            <div id="judgeResult" class="judge muted">尚未运行</div>
+          </section>
+        </div>
+      </section>
+
+      <section class="assistant-pane">
+        <div class="assistant-head">
+          <div>
+            <h2>AI 助手</h2>
+            <p>配置来自 data/ai_config.json</p>
+          </div>
+          <button id="toggleSettingsBtn" aria-expanded="false">配置</button>
+        </div>
+
+        <form id="settings" class="settings hidden">
+          <label>
+            Base URL
+            <input id="baseUrl" type="url" placeholder="https://api.openai.com/v1" />
+          </label>
+          <label>
+            Model
+            <input id="model" type="text" placeholder="gpt-4.1-mini / deepseek-chat" />
+          </label>
+          <label>
+            API Key
+            <input id="apiKey" type="password" placeholder="保存在 data/ai_config.json" />
+          </label>
+          <div class="settings-actions">
+            <button type="submit">保存配置</button>
+            <button id="reloadConfigBtn" type="button">重载配置</button>
+          </div>
+          <p id="configStatus" class="config-status">配置来自 data/ai_config.json</p>
+        </form>
+
+        <div class="ai-actions" aria-label="AI 快捷操作">
+          <button class="ai-action active" data-mode="explain">讲解题目</button>
+          <button class="ai-action" data-mode="hint">提供思路</button>
+          <button class="ai-action" data-mode="debug">检查错误</button>
+          <button class="ai-action" data-mode="optimize">优化代码</button>
+          <button class="ai-action danger-soft" data-mode="solution">完整解法</button>
+        </div>
+        <textarea id="aiMessage" class="ask-box" placeholder="可选：告诉助手你卡在哪里"></textarea>
+        <button id="askBtn" class="primary wide">询问助手</button>
+        <div id="aiReply" class="ai-reply muted">选中文字后也可以右键询问 AI。</div>
+      </section>
+    </main>
+
+    <div id="contextMenu" class="context-menu hidden" role="menu">
+      <button data-context-mode="selection-explain">解释选中内容</button>
+      <button data-context-mode="selection-hint">基于选中内容给思路</button>
+      <button data-context-mode="selection-optimize">优化选中 SQL</button>
+      <button data-context-mode="selection-ask">带着选中内容提问</button>
+    </div>
+
+    <script src="/vendor/codemirror/codemirror.min.js"></script>
+    <script src="/vendor/codemirror/sql.min.js"></script>
+    <script src="/vendor/codemirror/matchbrackets.min.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
